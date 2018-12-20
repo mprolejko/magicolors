@@ -2,7 +2,7 @@
   "name": "magicolors",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "images.js",
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts"
   },
@@ -16,5 +16,9 @@
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
+  },
+  "dependencies": {
+    "express": "^4.16.4",
+    "tslint": "^5.12.0"
   }
 }

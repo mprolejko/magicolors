@@ -363,6 +363,17 @@ export let blending = {
                 if (pixFront.alpha === 1) {
                     c = c.mul(pixFront);
                     c.alpha = 1;
+                } else if (pixFront.alpha > 0) {
+                    if (pixBack.alpha === 1) {
+                        c = pixBack.mul(pixFront);
+                        let cc = pixBack.sub(c).mul(pixFront.alpha);
+                        c = pixBack.sub(cc);
+                        c.alpha = 1;
+                    } else {
+                        // @todo backlayer layer transparency
+                        let alpha = pixFront.alpha +  (1 - pixFront.alpha) * pixBack.alpha;
+                        c.alpha = alpha;
+                    }
                 }
             }
 

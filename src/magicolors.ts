@@ -59,10 +59,9 @@ export class RGBColor extends Color {
         this.R = crop(R);
         this.G = crop(G);
         this.B = crop(B);
-        this.alpha = 0;
 
         RGBColor.operations.add = (x: number, y: number): number => (x + y) > 1 ? 1 : x + y;
-        RGBColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
+        RGBColor.operations.sub = (x: number, y: number): number => (x - y); // < 0 ? 0 : x - y;
         RGBColor.operations.mul = (x: number, y: number): number => x * y;
         RGBColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
     }
@@ -141,9 +140,9 @@ export class RGBColor extends Color {
             alpha = 1;
         } else {
             let bRGB = (value as Color).getRGB();
-            R = bRGB.R;
-            G = bRGB.G;
-            B = bRGB.B;
+            R = bRGB.R / 255;
+            G = bRGB.G / 255;
+            B = bRGB.B / 255;
             alpha = (value as Color).alpha;
         }
         return {R, G, B, alpha};
@@ -307,10 +306,9 @@ class ImageHelpers {
     private static pixels2imageData2 = (img: Array<Array<Color>>): ImageData => {
         let height = img.length;
         let width = img[0].length;
-        let index = 0;
-        const arr = new Uint8ClampedArray(width * height * 4);
-
         let  row = 0, col = 0;
+
+        const arr = new Uint8ClampedArray(width * height * 4);
         for (let i = 0; i < arr.length; i += 4) {
             col = Math.floor((i % (4 * width) ) / 4);
             row = Math.floor(i / (4 * width));
@@ -355,32 +353,40 @@ class ImageHelpers {
 
 export let blending = {
     "multiply" : function(imgA: ImageData, imgB: ImageData): ImageData {
-        return ImageHelpers.compose(function(pixA, pixB) {
+        return ImageHelpers.compose(function(pixBack, pixFront) {
             let c: Color;
-            let alpha = 0;
 
-            if (typeof pixA !== "undefined") {
-                c = pixA;
+            if (typeof pixBack !== "undefined") {
+                c = pixBack;
             }
-            if (typeof pixB !== "undefined") {
-                c = pixA.mul(pixB);
-                c.alpha = pixA.alpha + pixB.alpha * (1 - pixA.alpha);
-                c = pixA.mul(pixB);
+            if (typeof pixFront !== "undefined") {
+                if (pixFront.alpha === 1) {
+                    c = c.mul(pixFront);
+                    c.alpha = 1;
+                }
             }
 
             return c;
         }, imgA, imgB);
     },
     "normal" : function(imgA: ImageData, imgB: ImageData): ImageData {
-        return ImageHelpers.compose(function(pixA, pixB) {
+        return ImageHelpers.compose(function(pixBack, pixFront) {
             let c: Color;
-            let alpha = 0;
 
-            if (typeof pixA !== "undefined") {
-                c = pixA;
+            if (typeof pixBack !== "undefined") {
+                c = pixBack;
             }
-            if (typeof pixB !== "undefined") {
-                c = pixB;
+            if (typeof pixFront !== "undefined") {
+                c = pixFront;
+            }
+            if (pixFront.alpha < 1) { // semitransparent pixel
+                let alpha = pixFront.alpha +  (1 - pixFront.alpha) * pixBack.alpha;
+                let back  = pixBack.mul(pixBack.alpha);
+                let front = pixFront.mul(pixFront.alpha);
+                let cc = back.mul(1 - pixFront.alpha);
+                c = front.add(cc);
+
+                c.alpha = alpha;
             }
             return c;
 

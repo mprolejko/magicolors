@@ -1,4 +1,3 @@
-//import {blending} from './magicolors.js';
 import * as magicolors from './magicolors.js';
 
 var imgA = new Image();
@@ -23,7 +22,7 @@ imgA.onload = function() {
     ctxB.drawImage(imgB,0,0);
 
 
-    var resultImg = magicolors.blending['normal'](ctxA.getImageData(0,0, imgA.width,imgA.height),ctxB.getImageData(0,0, imgB.width,imgB.height))
+    var resultImg = magicolors.blending['multiply'](ctxA.getImageData(0,0, imgA.width,imgA.height),ctxB.getImageData(0,0, imgB.width,imgB.height))
 
     canvas.width = resultImg.width+50;
     canvas.height = resultImg.height+50;

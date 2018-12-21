@@ -50,27 +50,11 @@ var RGBColor = /** @class */ (function (_super) {
             B = arguments.length >= 3 ? b : 0;
         }
         var crop = function (c) { return c > 255 ? 1 : c >= 1 ? c / 255 : c < 0 ? 0 : c; };
-        // if (R > 1 && G > 1 && B > 1) {
-        //     this.R = R > 255 ? 1 : (R < 0 ? 0 : R);
-        //     this.G = G > 255 ? 1 : (G < 0 ? 0 : G);
-        //     this.B = B > 255 ? 1 : (B < 0 ? 0 : B);
-        // } else {
-        //     let to255 = c => Math.floor(c * 255);
-        //     this.R = R > 1 ? 255 : (R < 0 ? 0 : to255(R));
-        //     this.G = G > 1 ? 255 : (G < 0 ? 0 : to255(G));
-        //     this.B = B > 1 ? 255 : (B < 0 ? 0 : to255(B));
-        // }
         _this.R = crop(R);
         _this.G = crop(G);
         _this.B = crop(B);
-        _this.alpha = 0;
-        // overriding operations for 0-255 channel function
-        // RGBColor.operations.add = (x: number, y: number): number => (x + y) > 255 ? 255 : x + y;
-        // RGBColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
-        // RGBColor.operations.mul = (x: number, y: number): number => x * y / 255;
-        // RGBColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
         RGBColor.operations.add = function (x, y) { return (x + y) > 1 ? 1 : x + y; };
-        RGBColor.operations.sub = function (x, y) { return (x - y) < 0 ? 0 : x - y; };
+        RGBColor.operations.sub = function (x, y) { return (x - y); }; // < 0 ? 0 : x - y;
         RGBColor.operations.mul = function (x, y) { return x * y; };
         RGBColor.operations.div = function (x, y) { return y === 0 ? x : x / y; };
         return _this;
@@ -144,9 +128,9 @@ var RGBColor = /** @class */ (function (_super) {
         }
         else {
             var bRGB = value.getRGB();
-            R = bRGB.R;
-            G = bRGB.G;
-            B = bRGB.B;
+            R = bRGB.R / 255;
+            G = bRGB.G / 255;
+            B = bRGB.B / 255;
             alpha = value.alpha;
         }
         return { R: R, G: G, B: B, alpha: alpha };
@@ -157,7 +141,6 @@ var RGBColor = /** @class */ (function (_super) {
         color.R = RGBColor.operations[type](this.R, R);
         color.G = RGBColor.operations[type](this.G, G);
         color.B = RGBColor.operations[type](this.B, B);
-        // color.alpha = Color.operations[type](this.alpha, alpha);
         return color;
     };
     return RGBColor;
@@ -188,15 +171,6 @@ var HSVColor = /** @class */ (function (_super) {
         _this.H = H > 360 ? (H % 360 / 360) : H < 0 ? (H + 360) / 360 : H > 1 ? H / 360 : H;
         _this.S = crop(S);
         _this.V = crop(V);
-        // if (Number.isInteger(H) && Number.isInteger(S) && Number.isInteger(V)) {
-        //     this.H = (H + 10 * 360) % 360; // ugly workaround
-        //     this.S = S > 100 ? 100 : (S < 0 ? 0 : S);
-        //     this.V = V > 100 ? 100 : (V < 0 ? 0 : V);
-        // } else {
-        //     this.H = Math.floor( 360 * (H + 10) % 360 );
-        //     this.S = S > 1 ? 100 : (S < 0 ? 0 : Math.floor(S * 100));
-        //     this.V = V > 1 ? 100 : (V < 0 ? 0 : Math.floor(V * 100));
-        // }
         if (_this.V === 0) {
             _this.S = 0;
         }
@@ -204,10 +178,6 @@ var HSVColor = /** @class */ (function (_super) {
             _this.H = 0;
         }
         _this.alpha = 0;
-        // HSVColor.operations.add = (x: number, y: number): number => (x + y) > 100 ? 100 : x + y;
-        // HSVColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
-        // HSVColor.operations.mul = (x: number, y: number): number => x * y / 100;
-        // HSVColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
         HSVColor.operations.add = function (x, y) { return (x + y) > 1 ? 1 : x + y; };
         HSVColor.operations.sub = function (x, y) { return (x - y) < 0 ? 0 : x - y; };
         HSVColor.operations.mul = function (x, y) { return x * y; };
@@ -309,9 +279,8 @@ var ImageHelpers = /** @class */ (function () {
     ImageHelpers.pixels2imageData2 = function (img) {
         var height = img.length;
         var width = img[0].length;
-        var index = 0;
-        var arr = new Uint8ClampedArray(width * height * 4);
         var row = 0, col = 0;
+        var arr = new Uint8ClampedArray(width * height * 4);
         for (var i = 0; i < arr.length; i += 4) {
             col = Math.floor((i % (4 * width)) / 4);
             row = Math.floor(i / (4 * width));
@@ -353,29 +322,36 @@ var ImageHelpers = /** @class */ (function () {
 }());
 export var blending = {
     "multiply": function (imgA, imgB) {
-        return ImageHelpers.compose(function (pixA, pixB) {
+        return ImageHelpers.compose(function (pixBack, pixFront) {
             var c;
-            var alpha = 0;
-            if (typeof pixA !== "undefined") {
-                c = pixA;
+            if (typeof pixBack !== "undefined") {
+                c = pixBack;
             }
-            if (typeof pixB !== "undefined") {
-                c = pixA.mul(pixB);
-                c.alpha = pixA.alpha + pixB.alpha * (1 - pixA.alpha);
-                c = pixA.mul(pixB);
+            if (typeof pixFront !== "undefined") {
+                if (pixFront.alpha === 1) {
+                    c = c.mul(pixFront);
+                    c.alpha = 1;
+                }
             }
             return c;
         }, imgA, imgB);
     },
     "normal": function (imgA, imgB) {
-        return ImageHelpers.compose(function (pixA, pixB) {
+        return ImageHelpers.compose(function (pixBack, pixFront) {
             var c;
-            var alpha = 0;
-            if (typeof pixA !== "undefined") {
-                c = pixA;
+            if (typeof pixBack !== "undefined") {
+                c = pixBack;
             }
-            if (typeof pixB !== "undefined") {
-                c = pixB;
+            if (typeof pixFront !== "undefined") {
+                c = pixFront;
+            }
+            if (pixFront.alpha < 1) { // semitransparent pixel
+                var alpha = pixFront.alpha + (1 - pixFront.alpha) * pixBack.alpha;
+                var back = pixBack.mul(pixBack.alpha);
+                var front = pixFront.mul(pixFront.alpha);
+                var cc = back.mul(1 - pixFront.alpha);
+                c = front.add(cc);
+                c.alpha = alpha;
             }
             return c;
         }, imgA, imgB);

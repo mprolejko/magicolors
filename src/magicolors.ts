@@ -1,6 +1,7 @@
 
 
 abstract class Color {
+    /** The alpha channel <0;1> */
     public alpha: number;
 
     public abstract getHSL(): {H: number; S: number; L: number};
@@ -33,11 +34,12 @@ abstract class Color {
     }
 }
 
-
 export class RGBColor extends Color {
-    // channels as 0:255 values
+    /** The channel for red <0;1> */
     private R: number;
+    /** The channel for green <0;1> */
     private G: number;
+    /** The channel for blue <0;1> */
     private B: number;
 
     constructor(color: {R: number, G: number, B: number} | number, g?: number, b?: number) {
@@ -52,29 +54,22 @@ export class RGBColor extends Color {
             G = arguments.length >= 2 ? g : 0;
             B = arguments.length >= 3 ? b : 0;
         }
-        if (Number.isInteger(R) && Number.isInteger(G) && Number.isInteger(B)) {
-            this.R = R > 255 ? 255 : (R < 0 ? 0 : R);
-            this.G = G > 255 ? 255 : (G < 0 ? 0 : G);
-            this.B = B > 255 ? 255 : (B < 0 ? 0 : B);
-        } else {
-            let to255 = c => Math.floor(c * 255);
-            this.R = R > 1 ? 255 : (R < 0 ? 0 : to255(R));
-            this.G = G > 1 ? 255 : (G < 0 ? 0 : to255(G));
-            this.B = B > 1 ? 255 : (B < 0 ? 0 : to255(B));
-        }
+        let crop = (c: number) =>  c > 255 ? 1 : c >= 1 ? c / 255 : c < 0 ? 0 : c;
+
+        this.R = crop(R);
+        this.G = crop(G);
+        this.B = crop(B);
         this.alpha = 0;
 
-        // overriding operations for 0-255 channel function
-        RGBColor.operations.add = (x: number, y: number): number => (x + y) > 255 ? 255 : x + y;
+        RGBColor.operations.add = (x: number, y: number): number => (x + y) > 1 ? 1 : x + y;
         RGBColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
-        RGBColor.operations.mul = (x: number, y: number): number => x * y / 255;
+        RGBColor.operations.mul = (x: number, y: number): number => x * y;
         RGBColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
-
     }
     public getHSL() {
-        let r = this.R / 255;
-        let g = this.G / 255;
-        let b = this.B / 255;
+        let r = this.R;
+        let g = this.G;
+        let b = this.B;
 
         let cmax = Math.max(r, g, b);
         let cmin = Math.min(r, g, b);
@@ -100,9 +95,9 @@ export class RGBColor extends Color {
     }
 
     public getHSV() {
-        let r = this.R / 255;
-        let g = this.G / 255;
-        let b = this.B / 255;
+        let r = this.R;
+        let g = this.G;
+        let b = this.B;
 
         let cmax = Math.max(r, g, b);
         let cmin = Math.min(r, g, b);
@@ -124,12 +119,13 @@ export class RGBColor extends Color {
     }
 
     public getRGB() {
-        return {R: this.R , G: this.G, B: this.B};
+        let to255 = (c: number) => Math.round(c * 255);
+        return {R: to255(this.R) , G: to255(this.G), B: to255(this.B)};
     }
 
     public getHEX() {
         let hex = (c: number) =>  {
-            let h = c.toString(16);
+            let h = Math.floor(c * 255).toString(16);
             return h.length === 1 ? "0" + h : h;
         };
         return {hex : "#" + hex(this.R) + hex(this.G) + hex(this.B)};
@@ -161,7 +157,6 @@ export class RGBColor extends Color {
         color.R = RGBColor.operations[type](this.R, R);
         color.G = RGBColor.operations[type](this.G, G);
         color.B = RGBColor.operations[type](this.B, B);
-        // color.alpha = Color.operations[type](this.alpha, alpha);
 
         return (color as Color);
     }
@@ -169,9 +164,11 @@ export class RGBColor extends Color {
 }
 
 export class HSVColor extends Color {
-    // channels as 0:1 values
+    /** The hue channel <0;1> */
     private H: number;
+    /** The saturation channel <0;1> */
     private S: number;
+    /** The value/brightness channel <0;1> */
     private V: number;
 
     constructor(color: {H: number, S: number, V: number} | number, s?: number, v?: number) {
@@ -183,18 +180,14 @@ export class HSVColor extends Color {
             V = color.V;
         } else if (typeof color === "number") {
             H = color;
-            S = arguments.length >= 2 ? s : 100;
-            V = arguments.length >= 3 ? v : 100;
+            S = arguments.length >= 2 ? s : 1;
+            V = arguments.length >= 3 ? v : 1;
         }
-        if (Number.isInteger(H) && Number.isInteger(S) && Number.isInteger(V)) {
-            this.H = (H + 10 * 360) % 360; // ugly workaround
-            this.S = S > 100 ? 100 : (S < 0 ? 0 : S);
-            this.V = V > 100 ? 100 : (V < 0 ? 0 : V);
-        } else {
-            this.H = Math.floor( 360 * (H + 10) % 360 );
-            this.S = S > 1 ? 100 : (S < 0 ? 0 : Math.floor(S * 100));
-            this.V = V > 1 ? 100 : (V < 0 ? 0 : Math.floor(V * 100));
-        }
+
+        let crop = (c: number) =>  c > 100 ? 1 : c > 1 ? c / 100 : c < 0 ? 0 : c;
+        this.H = H > 360 ? (H % 360 / 360) : H < 0 ? (H + 360) / 360 : H > 1 ? H / 360 : H ;
+        this.S = crop(S);
+        this.V = crop(V);
         if (this.V === 0) {
             this.S = 0;
         }
@@ -203,16 +196,15 @@ export class HSVColor extends Color {
         }
         this.alpha = 0;
 
-        HSVColor.operations.add = (x: number, y: number): number => (x + y) > 100 ? 100 : x + y;
+        HSVColor.operations.add = (x: number, y: number): number => (x + y) > 1 ? 1 : x + y;
         HSVColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
-        HSVColor.operations.mul = (x: number, y: number): number => x * y / 100;
+        HSVColor.operations.mul = (x: number, y: number): number => x * y;
         HSVColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
-
     }
     public getHSL() {
-        let H = this.H;
-        let L = (2 - this.S / 100) * this.V / 200;
-        let S = L && L < 1 ? this.S / 100 * this.V / (L < 0.5 ? L * 2 : 2 - L * 2) / 100 : this.S / 100;
+        let H = this.H * 360;
+        let L = (2 - this.S) * this.V / 2;
+        let S = L && L < 1 ? this.S  * this.V / (L < 0.5 ? L * 2 : 2 - L * 2)  : this.S;
 
         L = Math.round(L * 100);
         S = Math.round(S * 100);
@@ -221,14 +213,15 @@ export class HSVColor extends Color {
     }
 
     public getHSV() {
-        return {H: this.H , S: this.S, V: this.V};
+        let to100 = (c: number) => Math.floor(c * 100);
+        return {H: Math.floor(this.H * 360), S: to100(this.S), V: to100(this.V)};
     }
 
     public getRGB() {
         let R: number, G: number, B: number;
-        let c = this.V / 100 * this.S / 100;
-        let x = c * ( 1 - Math.abs((this.H / 60) % 2 - 1));
-        let m = this.V / 100 - c;
+        let c = this.V * this.S;
+        let x = c * ( 1 - Math.abs((this.H * 6) % 2 - 1));
+        let m = this.V - c;
         let color = {R, G, B};
 
         if (this.H >= 0 && this.H < 60) {
@@ -276,10 +269,10 @@ export class HSVColor extends Color {
     }
 
     private hueOperations = {
-        "add": (x: number, y: number): number => (x + y) % 360,
+        "add": (x: number, y: number): number => (x + y)  - Math.floor(x + y),
         "div": (x: number, y: number): number =>  y === 0 ? x : x / y,
-        "mul": (x: number, y: number): number =>  x * y / 360,
-        "sub": (x: number, y: number): number => (x - y + 360) % 360,
+        "mul": (x: number, y: number): number =>  x * y,
+        "sub": (x: number, y: number): number => (x - y + 1) - Math.floor(x - y + 1),
     };
     protected operate( b: number | Color, type: "add"|"sub"|"mul"|"div"): Color {
         let color = new HSVColor(0, 0, 0);

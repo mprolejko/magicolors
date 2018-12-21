@@ -1,8 +1,9 @@
-import { expect, should} from "chai";
+import { expect } from "chai";
 import { describe, it } from "mocha";
 
 import { RGBColor } from "../src/magicolors";
 import { HSVColor } from "../src/magicolors";
+
 
 describe("Magicolors RGBColor", () => {
     it("can be initialized with 1 parameter", () => {
@@ -39,13 +40,6 @@ describe("Magicolors RGBColor", () => {
         expect(s.getRGB().R).to.equal(0);
         expect(s.getRGB().G).to.equal(255);
         expect(s.getRGB().B).to.equal(150);
-    });
-    it("values crop at 1.0 (-1,1.1,0.5)=>(0.0,1.0,0.5) for floats", () => {
-        const s = new RGBColor(-1, 1.1, 0.5);
-        expect(s.getHEX().hex).to.equal("#00ff7f");
-        expect(s.getRGB().R).to.equal(0);
-        expect(s.getRGB().G).to.equal(255);
-        expect(s.getRGB().B).to.equal(127);
     });
     it("gives correct HSV values", () => {
         const s1 = new RGBColor(0, 0, 0);

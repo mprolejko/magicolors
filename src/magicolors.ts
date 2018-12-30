@@ -286,6 +286,130 @@ export class HSVColor extends Color {
     }
 }
 
+export class HSLColor extends Color {
+    /** The hue channel <0;1> */
+    private H: number;
+    /** The saturation channel <0;1> */
+    private S: number;
+    /** The lightness channel <0;1> */
+    private L: number;
+
+    constructor(color: {H: number, S: number, L: number} | number, s?: number, l?: number) {
+        super();
+        let H: number, S: number, L: number;
+        if (arguments.length === 1 && typeof color === "object" ) {
+            H = color.H;
+            S = color.S;
+            L = color.L;
+        } else if (typeof color === "number") {
+            H = color;
+            S = arguments.length >= 2 ? s : 1;
+            L = arguments.length >= 3 ? l : 1;
+        }
+
+        let crop = (c: number) =>  c > 100 ? 1 : c > 1 ? c / 100 : c < 0 ? 0 : c;
+        this.H = H > 360 ? (H % 360 / 360) : H < 0 ? (H + 360) / 360 : H > 1 ? H / 360 : H ;
+        this.S = crop(S);
+        this.L = crop(L);
+        if (this.L === 0 || this.L === 1) {
+            this.S = 0;
+        }
+        if (this.S === 0) {
+            this.H = 0;
+        }
+        this.alpha = 0;
+
+        HSLColor.operations.add = (x: number, y: number): number => (x + y) > 1 ? 1 : x + y;
+        HSLColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
+        HSLColor.operations.mul = (x: number, y: number): number => x * y;
+        HSLColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
+    }
+
+    public getHSL(): { H: number; S: number; L: number; } {
+        let to100 = (c: number) => Math.floor(c * 100);
+        return {H: Math.floor(this.H * 360), S: to100(this.S), L: to100(this.L)};
+    }
+    public getHSV(): { H: number; S: number; V: number; } {
+        let H = this.H * 360;
+        let l = this.L * 2;
+        let s = this.S * (l <= 1 ? l : 2 - l);
+
+        let V = Math.round( (l + s) * 100 / 2);
+        let S = Math.round((2 * s) / (l * s));
+
+        return {H, S, V};
+    }
+    public getRGB(): { R: number; G: number; B: number; } {
+        let R: number, G: number, B: number;
+        let c = (1 - Math.abs(2 * this.L - 1)) * this.S;
+        let x = c * ( 1 - Math.abs((this.H * 6) % 2 - 1));
+        let m = this.L - c / 2;
+        let color = {R, G, B};
+
+        if (this.H >= 0 && this.H < 60) {
+            color = {R: c, G: x, B: 0};
+        } else if (this.H >= 60 && this.H < 120) {
+            color = {R: x, G: c, B: 0};
+        } else if (this.H >= 120 && this.H < 180) {
+            color = {R: 0, G: c, B: x};
+        } else  if (this.H >= 180 && this.H < 240) {
+            color = {R: 0, G: x, B: c};
+        } else if (this.H >= 240 && this.H < 300) {
+            color = {R: x, G: 0, B: c};
+        } else if (this.H >= 300 && this.H < 360) {
+            color = {R: c, G: 0, B: x};
+        }
+        let to255 = (col: number) => Math.round((col + m) * 255);
+        color.R = to255(color.R);
+        color.G = to255(color.G);
+        color.B = to255(color.B);
+
+        return color;
+    }
+    public getHEX(): { hex: string; } {
+            let c = new RGBColor(this.getRGB());
+            return c.getHEX();
+    }
+    protected operands(value: number | Color) {
+        let H: number, S: number, L: number, alpha: number;
+
+        if (typeof value === "number") {
+            H = value;
+            S = value;
+            L = value;
+            alpha = 1;
+        } else {
+            let bHSV = (value as Color).getHSL();
+            H = bHSV.H;
+            S = bHSV.S;
+            L = bHSV.L;
+            alpha = (value as Color).alpha;
+        }
+        return {H, S, L, alpha};
+    }
+
+    private hueOperations = {
+        "add": (x: number, y: number): number => (x + y)  - Math.floor(x + y),
+        "div": (x: number, y: number): number =>  y === 0 ? x : x / y,
+        "mul": (x: number, y: number): number =>  x * y,
+        "sub": (x: number, y: number): number => (x - y + 1) - Math.floor(x - y + 1),
+    };
+
+    protected operate(b: number | Color, type: "add" | "sub" | "mul" | "div"): Color {
+        let color = new HSLColor(0, 0, 0);
+        let {H, S, L, alpha} = this.operands(b);
+
+        color.H = this.hueOperations[type](this.H, H);
+        color.S = HSVColor.operations[type](this.S, S);
+        color.L = HSVColor.operations[type](this.L, L);
+        color.alpha = Color.operations[type](this.alpha, alpha);
+
+        return (color as Color);
+    }
+
+
+}
+
 class ImageHelpers {
 
     private static imageData2pixels = (img: ImageData): Array<Array<Color>> => {

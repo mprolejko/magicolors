@@ -92,7 +92,7 @@ describe("Magicolors HSVColor", () => {
         expect(s4.getHSL().L).to.equal(75);
         const s5 = new HSVColor(46, 68, 66);
         expect(s5.getHSL().H).to.equal(46);
-        expect(s5.getHSL().S).to.equal(52);
-        expect(s5.getHSL().L).to.equal(44);
+        expect(s5.getHSL().S).to.equal(51.52);
+        expect(s5.getHSL().L).to.equal(43.56);
     });
 });

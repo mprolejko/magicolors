@@ -49,10 +49,10 @@ describe("Magicolors RGBColor", () => {
         expect(s2.getHSV().H).to.equal(0);
         expect(s2.getHSV().S).to.equal(0);
         expect(s2.getHSV().V).to.equal(100);
-        const s3 = new RGBColor(169, 142, 54);
-        expect(s3.getHSV().H).to.equal(46);
-        expect(s3.getHSV().S).to.equal(68);
-        expect(s3.getHSV().V).to.equal(66);
+        const s3 = new RGBColor(168, 142, 54);
+        expect(s3.getHSV().H).to.equal(46.32);
+        expect(s3.getHSV().S).to.equal(67.86);
+        expect(s3.getHSV().V).to.equal(65.88);
     });
     it("gives correct HSL values", () => {
         const s1 = new RGBColor(0, 0, 0);
@@ -64,9 +64,9 @@ describe("Magicolors RGBColor", () => {
         expect(s2.getHSL().S).to.equal(0);
         expect(s2.getHSL().L).to.equal(100);
         const s3 = new RGBColor(168, 142, 54);
-        expect(s3.getHSL().H).to.equal(46);
-        expect(s3.getHSL().S).to.equal(51);
-        expect(s3.getHSL().L).to.equal(44);
+        expect(s3.getHSL().H).to.equal(46.32);
+        expect(s3.getHSL().S).to.equal(51.35);
+        expect(s3.getHSL().L).to.equal(43.53);
     });
 });
 

@@ -9,6 +9,10 @@ abstract class Color {
     public abstract getRGB(): {R: number; G: number; B: number};
     public abstract getHEX(): {hex: string};
 
+    public static precision = 2;
+    protected static fixed = function(n: number): number {
+        return Number(n.toFixed(Color.precision));
+    };
 
     protected abstract operands (value: number | Color): any;
     protected abstract operate ( b: number | Color, type: "add"|"sub"|"mul"|"div"): Color ;
@@ -75,8 +79,8 @@ export class RGBColor extends Color {
         let delta = cmax - cmin;
 
         let L = (cmax + cmin) / 2;
-        let S = L === 0 ? 0 : L === 1 ? 0 : Math.round(100 * (cmax - cmin) / (1 - Math.abs(2 * L - 1)));
-        L = Math.round(L * 100);
+        let S = L === 0 ? 0 : L === 1 ? 0 : Color.fixed(100 * (cmax - cmin) / (1 - Math.abs(2 * L - 1)));
+        L = Color.fixed(L * 100);
 
         let H = 0;
         if (cmax !== 0 && delta !== 0) {
@@ -88,7 +92,7 @@ export class RGBColor extends Color {
                 H = (r - g) / delta + 4;
             }
         }
-        H = Math.round( H * 60);
+        H = Color.fixed( H * 60);
 
         return {H, S, L};
     }
@@ -102,19 +106,20 @@ export class RGBColor extends Color {
         let cmin = Math.min(r, g, b);
         let delta = cmax - cmin;
 
-        let V = Math.round(cmax * 100);
-        let S = cmax === 0 ? 0 : Math.round(100 * delta / cmax);
+        let V = Color.fixed(cmax * 100);
+        let S = cmax === 0 ? 0 : Color.fixed(100 * delta / cmax);
         let H = 0;
         if (cmax !== 0 && delta !== 0) {
             if (cmax === r) {
-                H = Math.round(((g - b) / delta) % 6 * 60);
+                H = ((g - b) / delta) % 6;
             } else if (cmax === g) {
-                H = Math.round(((b - r) / delta + 2) * 60);
+                H = (b - r) / delta + 2;
             } else if (cmax === b) {
-                H = Math.round(((r - g) / delta + 4) * 60);
+                H = (r - g) / delta + 4;
             }
         }
-        return {H, S, V};
+
+        return {H: Color.fixed(H * 60), S, V};
     }
 
     public getRGB() {
@@ -124,7 +129,7 @@ export class RGBColor extends Color {
 
     public getHEX() {
         let hex = (c: number) =>  {
-            let h = Math.floor(c * 255).toString(16);
+            let h = Math.round(c * 255).toString(16);
             return h.length === 1 ? "0" + h : h;
         };
         return {hex : "#" + hex(this.R) + hex(this.G) + hex(this.B)};
@@ -201,19 +206,22 @@ export class HSVColor extends Color {
         HSVColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
     }
     public getHSL() {
-        let H = this.H * 360;
+        let H = Color.fixed(this.H * 360);
         let L = (2 - this.S) * this.V / 2;
         let S = L && L < 1 ? this.S  * this.V / (L < 0.5 ? L * 2 : 2 - L * 2)  : this.S;
 
-        L = Math.round(L * 100);
-        S = Math.round(S * 100);
+        L = Color.fixed(L * 100);
+        S = Color.fixed(S * 100);
 
         return {H, S, L};
     }
 
     public getHSV() {
-        let to100 = (c: number) => Math.floor(c * 100);
-        return {H: Math.floor(this.H * 360), S: to100(this.S), V: to100(this.V)};
+        return {
+            H: Color.fixed(this.H * 360),
+            S: Color.fixed(this.S * 100),
+            V: Color.fixed(this.V * 100),
+        };
     }
 
     public getRGB() {
@@ -304,7 +312,7 @@ export class HSLColor extends Color {
         } else if (typeof color === "number") {
             H = color;
             S = arguments.length >= 2 ? s : 1;
-            L = arguments.length >= 3 ? l : 1;
+            L = arguments.length >= 3 ? l : 0.5;
         }
 
         let crop = (c: number) =>  c > 100 ? 1 : c > 1 ? c / 100 : c < 0 ? 0 : c;
@@ -326,16 +334,18 @@ export class HSLColor extends Color {
     }
 
     public getHSL(): { H: number; S: number; L: number; } {
-        let to100 = (c: number) => Math.floor(c * 100);
-        return {H: Math.floor(this.H * 360), S: to100(this.S), L: to100(this.L)};
+        return {
+            H: Color.fixed(this.H * 360),
+            L: Color.fixed(this.L * 100),
+            S: Color.fixed(this.S * 100),
+        };
     }
     public getHSV(): { H: number; S: number; V: number; } {
-        let H = this.H * 360;
-        let l = this.L * 2;
-        let s = this.S * (l <= 1 ? l : 2 - l);
+        let H = Color.fixed(this.H * 360);
 
-        let V = Math.round( (l + s) * 100 / 2);
-        let S = Math.round((2 * s) / (l * s));
+        let sat = this.S * (this.L < 0.5 ? this.L : 1 - this.L);
+        let V = Color.fixed((this.L + sat) * 100);
+        let S = V === 0 ? 0 : Color.fixed(2 * sat * 100 / (this.L + sat));
 
         return {H, S, V};
     }

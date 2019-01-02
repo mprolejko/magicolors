@@ -5,6 +5,9 @@ import { RGBColor } from "../src/magicolors";
 
 
 describe("Magicolors RGBColor", () => {
+
+
+
     it("can be initialized with 1 parameter", () => {
         const s = new RGBColor({R: 5, G: 6, B: 7});
         expect(s.getHEX().hex).to.equal("#050607");
@@ -40,33 +43,42 @@ describe("Magicolors RGBColor", () => {
         expect(s.getRGB().G).to.equal(255);
         expect(s.getRGB().B).to.equal(150);
     });
-    it("gives correct HSV values", () => {
-        const s1 = new RGBColor(0, 0, 0);
-        expect(s1.getHSV().H).to.equal(0);
-        expect(s1.getHSV().S).to.equal(0);
-        expect(s1.getHSV().V).to.equal(0);
-        const s2 = new RGBColor(255, 255, 255);
-        expect(s2.getHSV().H).to.equal(0);
-        expect(s2.getHSV().S).to.equal(0);
-        expect(s2.getHSV().V).to.equal(100);
-        const s3 = new RGBColor(168, 142, 54);
-        expect(s3.getHSV().H).to.equal(46.32);
-        expect(s3.getHSV().S).to.equal(67.86);
-        expect(s3.getHSV().V).to.equal(65.88);
-    });
-    it("gives correct HSL values", () => {
-        const s1 = new RGBColor(0, 0, 0);
-        expect(s1.getHSL().H).to.equal(0);
-        expect(s1.getHSL().S).to.equal(0);
-        expect(s1.getHSL().L).to.equal(0);
-        const s2 = new RGBColor(255, 255, 255);
-        expect(s2.getHSL().H).to.equal(0);
-        expect(s2.getHSL().S).to.equal(0);
-        expect(s2.getHSL().L).to.equal(100);
-        const s3 = new RGBColor(168, 142, 54);
-        expect(s3.getHSL().H).to.equal(46.32);
-        expect(s3.getHSL().S).to.equal(51.35);
-        expect(s3.getHSL().L).to.equal(43.53);
+
+    let transformTests: {
+        args: [number | {R: number, G: number, B: number}, number?, number?],
+        hex: string,
+        hsv: [number, number, number],
+        hsl: [number, number, number],
+    }[]
+    = [
+        {args: [0, 0, 0],           hex: "#000000",    hsv: [0, 0, 0],              hsl: [0, 0, 0]},
+        {args: [255, 255, 255],     hex: "#ffffff",    hsv: [0, 0, 100],            hsl: [0, 0, 100]},
+        {args: [255, 0, 0],         hex: "#ff0000",    hsv: [0, 100, 100],          hsl: [0, 100, 50]},
+        {args: [168, 142, 54],      hex: "#a88e36",    hsv: [46.32, 67.86, 65.88],  hsl: [46.32, 51.35, 43.53]  },
+        // !{args: [241, 25, 176],      hex: "#f119b0",    hsv: [318.06, 89.63, 94.51], hsl: [318.06, 88.52, 52.16] },
+        {args: [178, 99, 203],      hex: "#b263cb",    hsv: [285.58, 51.23, 79.61], hsl: [285.58, 50, 59.22]    },
+        {args: [95, 231, 135],      hex: "#5fe787",    hsv: [137.65, 58.87, 90.59], hsl: [137.65, 73.91, 63.92] },
+        {args: [128, 150, 24],      hex: "#809618",    hsv: [70.48, 84, 58.82], hsl: [70.48, 72.41, 34.12] },
+        {args: [69, 34, 72],        hex: "#452248",    hsv: [295.26, 52.78, 28.24], hsl: [295.26, 35.85, 20.78] },
+        {args: [156, 242, 214],     hex: "#9cf2d6",    hsv: [160.47, 35.54, 94.9], hsl: [160.47, 76.79, 78.04] },
+    ];
+
+
+    transformTests.forEach(function (test) {
+        const s = new RGBColor(...(test.args));
+        it("gives correct hex values for RGB(" + test.args.join(",") + ")", () => {
+            expect(s.getHEX().hex).to.equal(test.hex);
+        });
+        it("gives correct HSV values for RGB(" + test.args.join(",") + ")", () => {
+            expect(s.getHSV().H).to.equal(test.hsv[0]);
+            expect(s.getHSV().S).to.equal(test.hsv[1]);
+            expect(s.getHSV().V).to.equal(test.hsv[2]);
+        });
+        it("gives correct HSL values for RGB(" + test.args.join(",") + ")", () => {
+            expect(s.getHSL().H).to.equal(test.hsl[0]);
+            expect(s.getHSL().S).to.equal(test.hsl[1]);
+            expect(s.getHSL().L).to.equal(test.hsl[2]);
+        });
     });
 });
 

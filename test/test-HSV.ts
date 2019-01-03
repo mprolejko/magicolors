@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe, it } from "mocha";
 
-import { HSVColor } from "../src/magicolors";
+import { HSVColor } from "../src/HSVColor";
 
 
 describe("Magicolors init tests for HSVColor", () => {

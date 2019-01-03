@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { describe, it } from "mocha";
 
-import { RGBColor } from "../src/magicolors";
+import { RGBColor } from "../src/RGBColor";
 
 
 describe("Magicolors RGBColor", () => {

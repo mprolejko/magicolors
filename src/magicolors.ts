@@ -92,7 +92,7 @@ export class RGBColor extends Color {
                 H = (r - g) / delta + 4;
             }
         }
-        H = Color.fixed( H * 60);
+        H = Color.fixed( (H * 60 + 360) % 360) ;
 
         return {H, S, L};
     }
@@ -119,7 +119,7 @@ export class RGBColor extends Color {
             }
         }
 
-        return {H: Color.fixed(H * 60), S, V};
+        return {H: Color.fixed((H * 60 + 360) % 360), S, V};
     }
 
     public getRGB() {
@@ -231,17 +231,19 @@ export class HSVColor extends Color {
         let m = this.V - c;
         let color = {R, G, B};
 
-        if (this.H >= 0 && this.H < 60) {
+        let H = Color.fixed(this.H * 360);
+
+        if (H >= 0 && H < 60) {
             color = {R: c, G: x, B: 0};
-        } else if (this.H >= 60 && this.H < 120) {
+        } else if (H >= 60 && H < 120) {
             color = {R: x, G: c, B: 0};
-        } else if (this.H >= 120 && this.H < 180) {
+        } else if (H >= 120 && H < 180) {
             color = {R: 0, G: c, B: x};
-        } else  if (this.H >= 180 && this.H < 240) {
+        } else  if (H >= 180 && H < 240) {
             color = {R: 0, G: x, B: c};
-        } else if (this.H >= 240 && this.H < 300) {
+        } else if (H >= 240 && H < 300) {
             color = {R: x, G: 0, B: c};
-        } else if (this.H >= 300 && this.H < 360) {
+        } else if (H >= 300 && H < 360) {
             color = {R: c, G: 0, B: x};
         }
         let to255 = (col: number) => Math.round((col + m) * 255);
@@ -356,17 +358,19 @@ export class HSLColor extends Color {
         let m = this.L - c / 2;
         let color = {R, G, B};
 
-        if (this.H >= 0 && this.H < 60) {
+        let H = this.H * 360;
+
+        if (H >= 0 && H < 60) {
             color = {R: c, G: x, B: 0};
-        } else if (this.H >= 60 && this.H < 120) {
+        } else if (H >= 60 && H < 120) {
             color = {R: x, G: c, B: 0};
-        } else if (this.H >= 120 && this.H < 180) {
+        } else if (H >= 120 && H < 180) {
             color = {R: 0, G: c, B: x};
-        } else  if (this.H >= 180 && this.H < 240) {
+        } else  if (H >= 180 && H < 240) {
             color = {R: 0, G: x, B: c};
-        } else if (this.H >= 240 && this.H < 300) {
+        } else if (H >= 240 && H < 300) {
             color = {R: x, G: 0, B: c};
-        } else if (this.H >= 300 && this.H < 360) {
+        } else if (H >= 300 && H < 360) {
             color = {R: c, G: 0, B: x};
         }
         let to255 = (col: number) => Math.round((col + m) * 255);

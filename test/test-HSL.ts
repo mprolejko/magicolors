@@ -45,7 +45,7 @@ describe("Magicolors init tests for HSLColor", () => {
 
 
 describe("Magicolors transform tests for HSLColor", () => {
-    let rgbTests: {
+    let transformTests: {
         args: [number | {H: number, S: number, L: number}, number?, number?],
         rgb: [number, number, number],
         hsv: [number, number, number],
@@ -60,7 +60,7 @@ describe("Magicolors transform tests for HSLColor", () => {
         {args: [67, 30, 70],      rgb: [196, 201, 156],      hsv: [67, 22.78, 79]},
     ];
 
-    rgbTests.forEach(function (test) {
+    transformTests.forEach(function (test) {
         const s = new HSLColor(...(test.args));
         it("gives correct RGB values for HSL(" + test.args.join(",") + ")", () => {
             expect(s.getRGB().R).to.equal(test.rgb[0]);

@@ -41,44 +41,33 @@ describe("Magicolors init tests for HSVColor", () => {
 
 
 describe("Magicolors transform tests for HSVColor", () => {
-    let rgbTests: {
+    let transformTests: {
         args: [number | {H: number, S: number, V: number}, number?, number?],
-        expected: [number, number, number],
+        rgb: [number, number, number],
+        hsl: [number, number, number],
     }[]
     = [
-        {args: [0, 0, 0],         expected: [0, 0, 0]},
-        {args: [0, 100, 100],     expected: [255, 0, 0]},
-        {args: [0, 100, 50],      expected: [128, 0, 0]},
-        {args: [46, 68, 66],      expected: [168, 142, 54]},
+        {args: [0, 0, 0],         rgb: [0, 0, 0],           hsl: [0, 0, 0]},
+        {args: [0, 0, 100],       rgb: [255, 255, 255],     hsl: [0, 0, 100]},
+        {args: [0, 100, 100],     rgb: [255, 0, 0],         hsl: [0, 100, 50]},
+        {args: [0, 100, 50],      rgb: [128, 0, 0],         hsl: [0, 100, 25]},
+        {args: [46, 68, 66],      rgb: [168, 142, 54],      hsl: [46, 51.52, 43.56]},
+        {args: [206, 63, 46],     rgb: [43, 85, 117],     hsl: [206, 45.99, 31.51]},
+        {args: [338, 73, 20],     rgb: [51, 14, 27],       hsl: [338, 57.48, 12.7]},
+        {args: [67, 30, 70],      rgb: [172, 179, 125],     hsl: [67, 25.93, 59.5]},
     ];
 
-    rgbTests.forEach(function (test) {
+    transformTests.forEach(function (test) {
+        const s = new HSVColor(...(test.args));
         it("gives correct RGB values for HSV(" + test.args.join(",") + ")", () => {
-            const s = new HSVColor(...(test.args));
-            expect(s.getRGB().R).to.equal(test.expected[0]);
-            expect(s.getRGB().G).to.equal(test.expected[1]);
-            expect(s.getRGB().B).to.equal(test.expected[2]);
+            expect(s.getRGB().R).to.equal(test.rgb[0]);
+            expect(s.getRGB().G).to.equal(test.rgb[1]);
+            expect(s.getRGB().B).to.equal(test.rgb[2]);
         });
-    });
-
-    let hsvTests: {
-        args: [number | {H: number, S: number, V: number}, number?, number?],
-        expected: [number, number, number],
-    }[]
-    = [
-        {args: [0, 0, 0],         expected: [0, 0, 0]},
-        {args: [0, 0, 100],       expected: [0, 0, 100]},
-        {args: [0, 100, 100],     expected: [0, 100, 50]},
-        {args: [0, 100, 50],      expected: [0, 100, 25]},
-        {args: [46, 68, 66],      expected: [46, 51.52, 43.56]},
-    ];
-
-    hsvTests.forEach(function (test) {
         it("gives correct HSL values for HSV(" + test.args.join(",") + ")", () => {
-            const s = new HSVColor(...(test.args));
-            expect(s.getHSL().H).to.equal(test.expected[0]);
-            expect(s.getHSL().S).to.equal(test.expected[1]);
-            expect(s.getHSL().L).to.equal(test.expected[2]);
+            expect(s.getHSL().H).to.equal(test.hsl[0]);
+            expect(s.getHSL().S).to.equal(test.hsl[1]);
+            expect(s.getHSL().L).to.equal(test.hsl[2]);
         });
     });
 });

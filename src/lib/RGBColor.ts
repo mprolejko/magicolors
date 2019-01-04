@@ -138,4 +138,10 @@ export class RGBColor extends Color {
         return (color as Color);
     }
 
+    public transform<T extends Color>(type: new () => T): Color {
+        if (type instanceof RGBColor) {
+            return new RGBColor(this.getRGB());
+        }
+        return new RGBColor(this.getRGB());
+    }
 }

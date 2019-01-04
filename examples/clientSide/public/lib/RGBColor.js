@@ -115,4 +115,10 @@ export class RGBColor extends Color {
         color.B = RGBColor.operations[type](this.B, B);
         return color;
     }
+    transform(type) {
+        if (type instanceof RGBColor) {
+            return new RGBColor(this.getRGB());
+        }
+        return new RGBColor(this.getRGB());
+    }
 }

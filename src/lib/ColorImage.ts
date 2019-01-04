@@ -1,7 +1,5 @@
 import { Color } from "./Color";
-import { RGBColor } from "./RGBColor";
-
-// import { Color } from "./Magicolors";
+import { Frame } from "./Frame";
 
 import * as fs from "fs";
 
@@ -23,7 +21,7 @@ function parseGif<T extends Color>( buffer: Buffer, callback: (err: Error, frame
 
   for (let i = 0; i < frameCount; i++) {
     let frameInfo = image.frameInfo(i);
-    let rgba = new Buffer(frameInfo.width * frameInfo.height * 4);
+    let rgba = new Array(frameInfo.width * frameInfo.height * 4);
     image.decodeAndBlitFrameRGBA(i, rgba);
     frames[i] = new Frame<T>(rgba, image.width, image.height, frameInfo.delay * 10);
   }
@@ -125,15 +123,4 @@ export class ColorImage<T extends Color> {
 
 }
 
-class Frame<T extends Color> extends Image {
-    public data: T[][];
-    public delay = 0;
-    constructor(rgba, width: number, height: number, delay?: number) {
-        super(width, height);
-        this.delay = delay;
-        let color: new () => T;
-        this.data = new color[width][height];
-        // todo parse buffer into pixels
-    }
-}
 

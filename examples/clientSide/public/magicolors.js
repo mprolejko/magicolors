@@ -26,6 +26,10 @@ var Color = /** @class */ (function () {
     Color.prototype.div = function (b) {
         return this.operate(b, "div");
     };
+    Color.precision = 2;
+    Color.fixed = function (n) {
+        return Number(n.toFixed(Color.precision));
+    };
     Color.operations = {
         "add": function (x, y) { return x + y; },
         "div": function (x, y) { return y === 0 ? x : x / y; },
@@ -67,8 +71,8 @@ var RGBColor = /** @class */ (function (_super) {
         var cmin = Math.min(r, g, b);
         var delta = cmax - cmin;
         var L = (cmax + cmin) / 2;
-        var S = L === 0 ? 0 : L === 1 ? 0 : Math.round(100 * (cmax - cmin) / (1 - Math.abs(2 * L - 1)));
-        L = Math.round(L * 100);
+        var S = L === 0 ? 0 : L === 1 ? 0 : Color.fixed(100 * (cmax - cmin) / (1 - Math.abs(2 * L - 1)));
+        L = Color.fixed(L * 100);
         var H = 0;
         if (cmax !== 0 && delta !== 0) {
             if (cmax === r) {
@@ -81,7 +85,7 @@ var RGBColor = /** @class */ (function (_super) {
                 H = (r - g) / delta + 4;
             }
         }
-        H = Math.round(H * 60);
+        H = Color.fixed((H * 60 + 360) % 360);
         return { H: H, S: S, L: L };
     };
     RGBColor.prototype.getHSV = function () {
@@ -91,21 +95,21 @@ var RGBColor = /** @class */ (function (_super) {
         var cmax = Math.max(r, g, b);
         var cmin = Math.min(r, g, b);
         var delta = cmax - cmin;
-        var V = Math.round(cmax * 100);
-        var S = cmax === 0 ? 0 : Math.round(100 * delta / cmax);
+        var V = Color.fixed(cmax * 100);
+        var S = cmax === 0 ? 0 : Color.fixed(100 * delta / cmax);
         var H = 0;
         if (cmax !== 0 && delta !== 0) {
             if (cmax === r) {
-                H = Math.round(((g - b) / delta) % 6 * 60);
+                H = ((g - b) / delta) % 6;
             }
             else if (cmax === g) {
-                H = Math.round(((b - r) / delta + 2) * 60);
+                H = (b - r) / delta + 2;
             }
             else if (cmax === b) {
-                H = Math.round(((r - g) / delta + 4) * 60);
+                H = (r - g) / delta + 4;
             }
         }
-        return { H: H, S: S, V: V };
+        return { H: Color.fixed((H * 60 + 360) % 360), S: S, V: V };
     };
     RGBColor.prototype.getRGB = function () {
         var to255 = function (c) { return Math.round(c * 255); };
@@ -113,7 +117,7 @@ var RGBColor = /** @class */ (function (_super) {
     };
     RGBColor.prototype.getHEX = function () {
         var hex = function (c) {
-            var h = Math.floor(c * 255).toString(16);
+            var h = Math.round(c * 255).toString(16);
             return h.length === 1 ? "0" + h : h;
         };
         return { hex: "#" + hex(this.R) + hex(this.G) + hex(this.B) };
@@ -185,16 +189,19 @@ var HSVColor = /** @class */ (function (_super) {
         return _this;
     }
     HSVColor.prototype.getHSL = function () {
-        var H = this.H * 360;
+        var H = Color.fixed(this.H * 360);
         var L = (2 - this.S) * this.V / 2;
         var S = L && L < 1 ? this.S * this.V / (L < 0.5 ? L * 2 : 2 - L * 2) : this.S;
-        L = Math.round(L * 100);
-        S = Math.round(S * 100);
+        L = Color.fixed(L * 100);
+        S = Color.fixed(S * 100);
         return { H: H, S: S, L: L };
     };
     HSVColor.prototype.getHSV = function () {
-        var to100 = function (c) { return Math.floor(c * 100); };
-        return { H: Math.floor(this.H * 360), S: to100(this.S), V: to100(this.V) };
+        return {
+            H: Color.fixed(this.H * 360),
+            S: Color.fixed(this.S * 100),
+            V: Color.fixed(this.V * 100)
+        };
     };
     HSVColor.prototype.getRGB = function () {
         var R, G, B;
@@ -202,22 +209,23 @@ var HSVColor = /** @class */ (function (_super) {
         var x = c * (1 - Math.abs((this.H * 6) % 2 - 1));
         var m = this.V - c;
         var color = { R: R, G: G, B: B };
-        if (this.H >= 0 && this.H < 60) {
+        var H = Color.fixed(this.H * 360);
+        if (H >= 0 && H < 60) {
             color = { R: c, G: x, B: 0 };
         }
-        else if (this.H >= 60 && this.H < 120) {
+        else if (H >= 60 && H < 120) {
             color = { R: x, G: c, B: 0 };
         }
-        else if (this.H >= 120 && this.H < 180) {
+        else if (H >= 120 && H < 180) {
             color = { R: 0, G: c, B: x };
         }
-        else if (this.H >= 180 && this.H < 240) {
+        else if (H >= 180 && H < 240) {
             color = { R: 0, G: x, B: c };
         }
-        else if (this.H >= 240 && this.H < 300) {
+        else if (H >= 240 && H < 300) {
             color = { R: x, G: 0, B: c };
         }
-        else if (this.H >= 300 && this.H < 360) {
+        else if (H >= 300 && H < 360) {
             color = { R: c, G: 0, B: x };
         }
         var to255 = function (col) { return Math.round((col + m) * 255); };
@@ -259,6 +267,122 @@ var HSVColor = /** @class */ (function (_super) {
     return HSVColor;
 }(Color));
 export { HSVColor };
+var HSLColor = /** @class */ (function (_super) {
+    __extends(HSLColor, _super);
+    function HSLColor(color, s, l) {
+        var _this = _super.call(this) || this;
+        _this.hueOperations = {
+            "add": function (x, y) { return (x + y) - Math.floor(x + y); },
+            "div": function (x, y) { return y === 0 ? x : x / y; },
+            "mul": function (x, y) { return x * y; },
+            "sub": function (x, y) { return (x - y + 1) - Math.floor(x - y + 1); }
+        };
+        var H, S, L;
+        if (arguments.length === 1 && typeof color === "object") {
+            H = color.H;
+            S = color.S;
+            L = color.L;
+        }
+        else if (typeof color === "number") {
+            H = color;
+            S = arguments.length >= 2 ? s : 1;
+            L = arguments.length >= 3 ? l : 0.5;
+        }
+        var crop = function (c) { return c > 100 ? 1 : c > 1 ? c / 100 : c < 0 ? 0 : c; };
+        _this.H = H > 360 ? (H % 360 / 360) : H < 0 ? (H + 360) / 360 : H > 1 ? H / 360 : H;
+        _this.S = crop(S);
+        _this.L = crop(L);
+        if (_this.L === 0 || _this.L === 1) {
+            _this.S = 0;
+        }
+        if (_this.S === 0) {
+            _this.H = 0;
+        }
+        _this.alpha = 0;
+        HSLColor.operations.add = function (x, y) { return (x + y) > 1 ? 1 : x + y; };
+        HSLColor.operations.sub = function (x, y) { return (x - y) < 0 ? 0 : x - y; };
+        HSLColor.operations.mul = function (x, y) { return x * y; };
+        HSLColor.operations.div = function (x, y) { return y === 0 ? x : x / y; };
+        return _this;
+    }
+    HSLColor.prototype.getHSL = function () {
+        return {
+            H: Color.fixed(this.H * 360),
+            L: Color.fixed(this.L * 100),
+            S: Color.fixed(this.S * 100)
+        };
+    };
+    HSLColor.prototype.getHSV = function () {
+        var H = Color.fixed(this.H * 360);
+        var sat = this.S * (this.L < 0.5 ? this.L : 1 - this.L);
+        var V = Color.fixed((this.L + sat) * 100);
+        var S = V === 0 ? 0 : Color.fixed(2 * sat * 100 / (this.L + sat));
+        return { H: H, S: S, V: V };
+    };
+    HSLColor.prototype.getRGB = function () {
+        var R, G, B;
+        var c = (1 - Math.abs(2 * this.L - 1)) * this.S;
+        var x = c * (1 - Math.abs((this.H * 6) % 2 - 1));
+        var m = this.L - c / 2;
+        var color = { R: R, G: G, B: B };
+        var H = this.H * 360;
+        if (H >= 0 && H < 60) {
+            color = { R: c, G: x, B: 0 };
+        }
+        else if (H >= 60 && H < 120) {
+            color = { R: x, G: c, B: 0 };
+        }
+        else if (H >= 120 && H < 180) {
+            color = { R: 0, G: c, B: x };
+        }
+        else if (H >= 180 && H < 240) {
+            color = { R: 0, G: x, B: c };
+        }
+        else if (H >= 240 && H < 300) {
+            color = { R: x, G: 0, B: c };
+        }
+        else if (H >= 300 && H < 360) {
+            color = { R: c, G: 0, B: x };
+        }
+        var to255 = function (col) { return Math.round((col + m) * 255); };
+        color.R = to255(color.R);
+        color.G = to255(color.G);
+        color.B = to255(color.B);
+        return color;
+    };
+    HSLColor.prototype.getHEX = function () {
+        var c = new RGBColor(this.getRGB());
+        return c.getHEX();
+    };
+    HSLColor.prototype.operands = function (value) {
+        var H, S, L, alpha;
+        if (typeof value === "number") {
+            H = value;
+            S = value;
+            L = value;
+            alpha = 1;
+        }
+        else {
+            var bHSV = value.getHSL();
+            H = bHSV.H;
+            S = bHSV.S;
+            L = bHSV.L;
+            alpha = value.alpha;
+        }
+        return { H: H, S: S, L: L, alpha: alpha };
+    };
+    HSLColor.prototype.operate = function (b, type) {
+        var color = new HSLColor(0, 0, 0);
+        var _a = this.operands(b), H = _a.H, S = _a.S, L = _a.L, alpha = _a.alpha;
+        color.H = this.hueOperations[type](this.H, H);
+        color.S = HSVColor.operations[type](this.S, S);
+        color.L = HSVColor.operations[type](this.L, L);
+        color.alpha = Color.operations[type](this.alpha, alpha);
+        return color;
+    };
+    return HSLColor;
+}(Color));
+export { HSLColor };
 var ImageHelpers = /** @class */ (function () {
     function ImageHelpers() {
     }

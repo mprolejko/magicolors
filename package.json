@@ -4,7 +4,8 @@
   "description": "",
   "main": "images.js",
   "scripts": {
-    "test": "mocha --require ts-node/register test/**/*.ts"
+    "test": "mocha --require ts-node/register test/**/*.ts",
+    "clientMagicolors": "tsc src/Magicolors.ts --outDir examples/clientSide/public -t \"es6\""
   },
   "keywords": [],
   "author": "",

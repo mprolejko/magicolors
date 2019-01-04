@@ -1,4 +1,4 @@
-import * as magicolors from './magicolors.js';
+import * as magicolors from './Magicolors.js';
 
 var imgA = new Image();
 imgA.src = document.getElementById('srcA').src;

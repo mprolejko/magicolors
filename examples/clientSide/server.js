@@ -3,7 +3,7 @@ const express = require('express')
 const port = 3000
 
 const app = express(),
-      staticServe = express.static(`${ __dirname }/client`);
+      staticServe = express.static(`${ __dirname }/public`);
 
 app.use("/", staticServe);
 app.use("*", staticServe);

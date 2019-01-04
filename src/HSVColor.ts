@@ -8,6 +8,17 @@ export class HSVColor extends Color {
     /** The value/brightness channel <0;1> */
     private V: number;
 
+    public colorNames: { [name: string]: [number, number, number] } =
+    {   "black":    [0, 0, 0],
+        "blue":     [240, 100, 100],
+        "green":    [120, 100, 100],
+        "red":      [0, 100, 100],
+        "white":    [0, 0, 100],
+    };
+    public colorByName(name: string): Color {
+        return new HSVColor(...(this.colorNames[name]));
+    }
+
     constructor(color: {H: number, S: number, V: number} | number, s?: number, v?: number) {
         super();
         let H: number, S: number, V: number;

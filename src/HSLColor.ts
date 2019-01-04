@@ -8,6 +8,17 @@ export class HSLColor extends Color {
     /** The lightness channel <0;1> */
     private L: number;
 
+    public colorNames: { [name: string]: [number, number, number] } =
+    {   "black":    [0, 0, 0],
+        "blue":     [240, 100, 50],
+        "green":    [120, 100, 50],
+        "red":      [0, 100, 50],
+        "white":    [0, 0, 100],
+    };
+    public colorByName(name: string): Color {
+        throw new HSLColor(...(this.colorNames[name]));
+    }
+
     constructor(color: {H: number, S: number, L: number} | number, s?: number, l?: number) {
         super();
         let H: number, S: number, L: number;

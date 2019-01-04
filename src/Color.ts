@@ -34,4 +34,13 @@ export abstract class Color {
     public div( b: number | Color): Color {
         return this.operate(b, "div");
     }
+
+    public colorNames: { [name: string]: [number, number, number] };
+
+    public abstract colorByName(name: string): Color;
+
+    public static getColorByName<T extends Color>(name: string): T {
+        let color: new () => T;
+        return (new color()).colorByName(name) as T;
+    }
 }

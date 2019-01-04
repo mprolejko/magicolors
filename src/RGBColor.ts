@@ -8,6 +8,17 @@ export class RGBColor extends Color {
     /** The channel for blue <0;1> */
     private B: number;
 
+    public colorNames: { [name: string]: [number, number, number] } =
+    {   "black": [0, 0, 0],
+        "blue":  [0, 255, 0],
+        "green":  [0, 0, 255],
+        "red":  [255, 0, 0],
+        "white":  [255, 255, 255],
+    };
+    public colorByName(name: string): Color {
+        return new RGBColor(...(this.colorNames[name]));
+    }
+
     constructor(color: {R: number, G: number, B: number} | number, g?: number, b?: number) {
         super();
         let R: number, G: number, B: number;

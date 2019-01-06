@@ -27,7 +27,7 @@ let compose = (operation, imgA, imgB) => {
             }
         }
     }
-    return result.fromPixels();
+    return { imageData: result.fromPixels(), width, height };
 };
 export let blending = {
     "multiply": function (imgA, imgB) {

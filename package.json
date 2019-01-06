@@ -5,7 +5,8 @@
   "main": "images.js",
   "scripts": {
     "test": "mocha --require ts-node/register test/**/*.ts",
-    "clientMagicolors": "tsc src/Magicolors.ts --outDir examples/clientSide/public -t \"es6\""
+    "clientMagicolors": "tsc src/Magicolors.ts --outDir examples/clientSide/public -t \"es6\"",
+    "serverMagicolors": "tsc src/Magicolors.ts --outDir examples/serverSide -t \"es6\" -m commonjs && tsc src/lib/ColorImage.ts --outDir examples/serverSide/lib -t \"es6\" -m commonjs"
   },
   "keywords": [],
   "author": "",
@@ -13,12 +14,14 @@
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.18",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "ts-node": "^7.0.1",
     "typescript": "^3.2.2"
   },
   "dependencies": {
+    "canvas": "^2.2.0",
     "express": "^4.16.4",
     "tslint": "^5.12.0"
   }

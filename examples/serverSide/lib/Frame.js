@@ -1,6 +1,8 @@
-import { Color } from "./Color.js";
-import { RGBColor } from "./RGBColor.js";
-export class Frame {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const Color_1 = require("./Color");
+const RGBColor_1 = require("./RGBColor");
+class Frame {
     constructor(rgba, width, height, delay, type) {
         this.delay = 0;
         this.toPixels = (rgba, type) => {
@@ -8,7 +10,7 @@ export class Frame {
                 this.data[row] = [];
                 for (let col = 0; col < this.width; col++) {
                     let index = (col + (row * this.width)) * 4;
-                    let rgb = new RGBColor(rgba[index], rgba[index + 1], rgba[index + 2]);
+                    let rgb = new RGBColor_1.RGBColor(rgba[index], rgba[index + 1], rgba[index + 2]);
                     this.data[row][col] = rgb.transform(type);
                     this.data[row][col].alpha = rgba[index + 3] / 255;
                 }
@@ -29,8 +31,9 @@ export class Frame {
             return arr;
         };
         if (arguments.length < 5) {
-            type = RGBColor;
+            type = RGBColor_1.RGBColor;
         }
+        // super(width, height);
         this.width = width;
         this.height = height;
         this.delay = delay;
@@ -42,14 +45,24 @@ export class Frame {
             else {
                 this.data = rgba;
             }
+            // if (Array.isArray(rgba[0])) {
+            //   this.data = rgba;
+            // } else {
+            //     this.toPixels(rgba, type);
+            // }
+            // this.toPixels(rgba, type);
         }
         else {
             for (let row = 0; row < this.height; row++) {
                 this.data[row] = [];
                 for (let col = 0; col < this.width; col++) {
-                    this.data[row][col] = Color.getColorByName("black", type);
+                    this.data[row][col] = Color_1.Color.getColorByName("black", type);
                 }
             }
         }
+        // } else if (rgba !== null) {
+        //   this.data = rgba;
+        // }
     }
 }
+exports.Frame = Frame;

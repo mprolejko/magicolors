@@ -27,6 +27,6 @@ imgA.onload = function() {
     canvas.width = resultImg.width+50;
     canvas.height = resultImg.height+50;
 
-    ctx.putImageData(resultImg,25,25);
+    ctx.putImageData(new ImageData(resultImg.imageData, resultImg.width),25,25);
     imgA.style.display = 'none';
 };

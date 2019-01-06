@@ -1,23 +1,36 @@
 import { Color } from "./Color";
 import { RGBColor } from "./RGBColor";
 
-export class Frame<T extends Color> extends Image {
+export class Frame<T extends Color> {
     public data: T[][];
+    public width: number;
+    public height: number;
     public delay = 0;
-    constructor(rgba: T[][] | Uint8ClampedArray, width: number, height: number, delay?: number) {
-        super(width, height);
+    constructor(rgba: T[][] | Uint8ClampedArray | Buffer, width: number, height: number, delay?: number, type?: any) {
+        if (arguments.length < 5) {
+          type = RGBColor;
+        }
+        this.width = width;
+        this.height = height;
         this.delay = delay;
-        let type: new () => T;
         this.data = [];
-        if (rgba instanceof Uint8ClampedArray) {
-          this.toPixels(rgba);
-        } else if (rgba !== null) {
-          this.data = rgba;
+          if (rgba !== null) {
+            if (rgba instanceof Uint8ClampedArray || rgba instanceof Buffer) {
+              this.toPixels(rgba, type);
+            } else {
+              this.data = rgba;
+            }
+          } else {
+            for (let row = 0; row < this.height; row++) {
+              this.data[row] = [];
+              for (let col = 0; col < this.width; col++) {
+                this.data[row][col] = Color.getColorByName<T>("black", type);
+              }
+          }
         }
     }
 
-    private toPixels = (rgba: Buffer | Uint8ClampedArray): void => {
-      let type: new () => T;
+    private toPixels = (rgba: Buffer | Uint8ClampedArray, type: any): void => {
       for (let row = 0; row < this.height; row++) {
         this.data[row] = [];
         for (let col = 0; col < this.width; col++) {
@@ -29,8 +42,7 @@ export class Frame<T extends Color> extends Image {
       }
     }
 
-    public fromPixels = (): ImageData => {
-      let type: new () => T;
+    public fromPixels = ():  Uint8ClampedArray => {
       let  row = 0, col = 0;
 
       const arr = new Uint8ClampedArray(this.width * this.height * 4);
@@ -44,6 +56,6 @@ export class Frame<T extends Color> extends Image {
           arr[i + 3] = this.data[row][col].alpha * 255;
       }
 
-      return new ImageData(arr, this.width, this.height);
+      return arr;
     }
 }

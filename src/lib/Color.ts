@@ -39,8 +39,7 @@ export abstract class Color {
 
     public abstract colorByName(name: string): Color;
 
-    public static getColorByName<T extends Color>(name: string): T {
-        let color: new () => T;
-        return (new color()).colorByName(name) as T;
+    public static getColorByName<T extends Color>(name: string, type: any): T {
+        return (new type()).colorByName(name) as T;
     }
 }

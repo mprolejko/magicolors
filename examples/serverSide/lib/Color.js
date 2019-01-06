@@ -1,4 +1,6 @@
-export class Color {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+class Color {
     add(b) {
         return this.operate(b, "add");
     }
@@ -25,3 +27,4 @@ Color.operations = {
     "mul": (x, y) => x * y,
     "sub": (x, y) => x - y,
 };
+exports.Color = Color;

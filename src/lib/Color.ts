@@ -1,6 +1,7 @@
 export abstract class Color {
     /** The alpha channel <0;1> */
     public alpha: number;
+    public channels: string[];
 
     public abstract getHSL(): {H: number; S: number; L: number};
     public abstract getHSV(): {H: number; S: number; V: number};
@@ -34,6 +35,7 @@ export abstract class Color {
     public div( b: number | Color): Color {
         return this.operate(b, "div");
     }
+    public abstract getRaw(): any;
 
     public colorNames: { [name: string]: [number, number, number] };
 

@@ -15,6 +15,7 @@ export class HSVColor extends Color {
         "red":      [0, 100, 100],
         "white":    [0, 0, 100],
     };
+    public channels = ["H", "S", "V"];
     public colorByName(name: string): Color {
         return new HSVColor(...(this.colorNames[name]));
     }
@@ -48,6 +49,9 @@ export class HSVColor extends Color {
         HSVColor.operations.sub = (x: number, y: number): number => (x - y) < 0 ? 0 : x - y;
         HSVColor.operations.mul = (x: number, y: number): number => x * y;
         HSVColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
+    }
+    public getRaw() {
+        return {RH: this.H, S: this.S, V: this.V};
     }
     public getHSL() {
         let H = Color.fixed(this.H * 360);
@@ -87,7 +91,7 @@ export class HSVColor extends Color {
             color = {R: 0, G: x, B: c};
         } else if (H >= 240 && H < 300) {
             color = {R: x, G: 0, B: c};
-        } else if (H >= 300 && H < 360) {
+        } else if (H >= 300 && H <= 360) {
             color = {R: c, G: 0, B: x};
         }
         let to255 = (col: number) => Math.round((col + m) * 255);

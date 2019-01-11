@@ -15,6 +15,7 @@ export class RGBColor extends Color {
         "red":  [255, 0, 0],
         "white":  [255, 255, 255],
     };
+    public channels = ["R", "G", "B"];
     public colorByName(name: string): Color {
         return new RGBColor(...(this.colorNames[name]));
     }
@@ -41,6 +42,9 @@ export class RGBColor extends Color {
         RGBColor.operations.sub = (x: number, y: number): number => (x - y); // < 0 ? 0 : x - y;
         RGBColor.operations.mul = (x: number, y: number): number => x * y;
         RGBColor.operations.div = (x: number, y: number): number => y === 0 ? x : x / y;
+    }
+    public getRaw() {
+        return {R: this.R, G: this.G, B: this.B};
     }
     public getHSL() {
         let r = this.R;
